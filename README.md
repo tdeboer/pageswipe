@@ -1,11 +1,10 @@
-Portfolio website
+<h1>Pageswipe</h1>
+<h2>Jquery UI widget</h2>
 
-Show each project as one page.
-The project pages are as wide as the viewport and are positioned next to eachother.
-Mobile first approach and a responsive design.
-Swipe horizontally through projects.
+The pages are as wide as the viewport and are underneath next to eachother.
+Swipe horizontally through pages.
 One navigation with all the pages, updating when sliding.
-Load pages asynchronous
+Load pages asynchronous.
 
 Todo:
 - call widget lik this: $('wrapper').swipeable({ options });
