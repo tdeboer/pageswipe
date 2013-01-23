@@ -1,0 +1,42 @@
+@import "compass/css3/box-shadow";
+
+
+body {
+	position: relative;
+	overflow-x: hidden; /* does it work on mobile?? needed? */
+}
+
+.shutter {
+	display: none;
+}
+
+.touch .shutter {
+	background: #676767 repeat-x fixed url('../gfx/bg-noise-half.png');
+	position: fixed;
+	height: 100%;
+	top: 0;
+	right: 0;
+	left: 0;
+	display: block;
+}
+
+.page {
+	padding: 6.25% 6.25% 12.5%; /* 20 % 320 */
+	position: relative;
+	top: 0;
+	z-index: 0;
+	/* -webkit-transform: translateZ(0); */
+	background-color: #eee;
+	@include single-box-shadow;
+	/* @include debug-vertical-alignment; */
+}
+
+.touch .page {
+	position: fixed;
+}
+
+.page.first {
+	top: auto;
+	position: relative;
+	z-index: 10;
+}
