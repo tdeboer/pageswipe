@@ -65,11 +65,12 @@ $(function() {
 				// add navigation
 				// todo: do not build dynamically
 				var navEl = $('<a></a>');
-				navEl.attr({
-					href: '#'+$page.attr('id'),
-					alt: $page.attr('id'),
-					class: $page.attr('id')
-				}).text($page.attr('data-title'));
+				var pageId = $page.attr('id');
+				//navEl.attr({ href: href, alt: $page.attr('id'), class: $page.attr('id') }).text($page.attr('data-title'));  // tis notation break yui compressor
+				navEl.attr('href', '#'+pageId);
+				navEl.attr('alt', pageId);
+				navEl.attr('class', pageId);
+				navEl.text($page.attr('data-title'));
 				nav.append(navEl);
 				
 			});
