@@ -1,4 +1,4 @@
-define(['jqui','events','scrollTo','transit'], function() {
+define(['jqui', 'events', 'scrollTo', 'transit'], function() {
 
 
 	
@@ -7,17 +7,16 @@ define(['jqui','events','scrollTo','transit'], function() {
 	
 		var windowWidth,
 			windowHeight,
-			padding,
 			headerHeight,
 			that,
-			scr = false,
-			slideAnimating = false,
 			current, // current page
 			next, // next page
 			prev, // previous page
 			last, // previous visible page
-			nav,
-			logging = false,
+			nav, // navigation element as jQuery object
+			slideAnimating = false,
+			logging = false, // turn logs on/off
+			scrolling = false,
 			sliding = false,
 			offset = false;
 			
@@ -25,8 +24,6 @@ define(['jqui','events','scrollTo','transit'], function() {
 		$.widget( "custom.swipeable", {
 			swipeStart: {},
 			swipeStop: {},
-			pos: null,
-			preventScroll: false,
 			curPos: 0,
 			
 			// default options
@@ -36,10 +33,6 @@ define(['jqui','events','scrollTo','transit'], function() {
 				scrollSupressionThreshold: 20, // More than this horizontal displacement, and we will suppress scrolling.
 				swipeThreshold: 0.25,  // Swipe horizontal displacement must be more than this to go to next page
 				verticalDistanceThreshold: 5, // Swipe vertical displacement must be less than this.
-				swipeBoundry: 40, // Stop the swipe at this point if there is nothing to swipe to
-				disableSwipe: false,
-				scrolling: false,
-				timer: null,
 				load: true
 			},
 			
@@ -106,8 +99,7 @@ define(['jqui','events','scrollTo','transit'], function() {
 					this._on({
 						touchstart: "_touchStart",
 						touchmove: "_touchMove",
-						touchend: "_touchEnd",
-						scrollstart: "_scrollStart"
+						touchend: "_touchEnd"
 					});
 	
 					$(window).bind({
@@ -132,6 +124,7 @@ define(['jqui','events','scrollTo','transit'], function() {
 						click: this._gotoPage
 					});
 					
+					// bind all listeners
 					$(window).bind({
 						scrollstop: this._updateNav
 					});
@@ -151,22 +144,22 @@ define(['jqui','events','scrollTo','transit'], function() {
 			
 			
 			_touchMove: function(event) {
-				if (!slideAnimating && !scr) {
+				if (!slideAnimating && !scrolling) {
 					event.stopImmediatePropagation();
 					var diffX = this.swipeStart.coords[0] - event.originalEvent.touches[0].pageX;
 					
 					var diffY = this.swipeStart.coords[1] - event.originalEvent.touches[0].pageY;
 					/*
-					if( Math.abs(diffY) < this.options.verticalDistanceThreshold || sliding ) {
+					if( Math.abs(diffY) < this.options.verticalDistanceThreshold || sliding ) { // could (also e.g. combined with diffX) be used to seperate scroll from swipe
 					*/
 					if( sliding || Math.abs(diffX) > this.options.scrollSupressionThreshold ) {
 						event.preventDefault();
 						current.css({ x: 0 - diffX });
 						
-						if (!sliding) { // todo: what if user slides first left and then right in one movement?
+						if (!sliding) {
 							if (diffX > this.options.scrollSupressionThreshold/2) {
 								if (current.hasClass('last')) {
-									$('.shutter').css('z-index', 5); // hide pages underneath with another dummy page
+									$('.shutter').css('z-index', 5); // hide pages underneath with a dummy page
 								} else {
 									next.css('z-index', 5);
 									$('.shutter').css('z-index', 0);
@@ -183,17 +176,17 @@ define(['jqui','events','scrollTo','transit'], function() {
 						
 						sliding = true;
 					} else if (Math.abs(diffY) >= 5) {
-						scr = true;
+						scrolling = true;
 					}
 				}
-				//this._sticky();
+				
 			},
 			
 			
-			// todo: 
 			_touchEnd: function(event) {
 				// check if a swipe occurred
-				if (sliding && !slideAnimating) {that._log('swiped:true');
+				if (sliding && !slideAnimating) {
+					that._log('swiped:true');
 					
 					var start = this.swipeStart,
 						end = event.originalEvent.changedTouches[0],
@@ -202,7 +195,7 @@ define(['jqui','events','scrollTo','transit'], function() {
 						scrolledPassHeader = $(document).scrollTop() > headerHeight;
 					
 					sliding = false;
-					scr = false;
+					scrolling = false;
 					slideAnimating = true;
 					
 					// snap to point
@@ -281,9 +274,11 @@ define(['jqui','events','scrollTo','transit'], function() {
 				
 				var target = $(this).attr('href');
 				var placeholder = $(target);
-				$.scrollTo(placeholder, 1400, { onAfter: function() {
-					window.location.hash = target;
-				}
+				
+				$.scrollTo(placeholder, 1400, {
+					onAfter: function() {
+						window.location.hash = target;
+					}
 				});
 			},
 			
@@ -294,18 +289,10 @@ define(['jqui','events','scrollTo','transit'], function() {
 			},
 			
 			
-			showPage: function(newPage) {
-				current.hide();
-				newPage.show().css({'position':'relative', 'top':'auto', 'z-index':'10', 'min-height':windowHeight});
-				past = current;
-				current = newPage;
-			},
-			
-			
 			_updateNav: function() {
 				$('.header .selected').removeClass('selected');
 				var visibleId;
-				$('.page').each(function() {
+				$('.page, .special-page').each(function() {
 					if ( $(document).scrollTop() >= $(this).offset().top ) {
 						visibleId = $(this).attr('id');
 					}
@@ -338,14 +325,8 @@ define(['jqui','events','scrollTo','transit'], function() {
 			},
 			
 			
-			_scrollStart: function(event) {
-				//scr = true; // Get's called even before the user actually scrolls
-			},
-			
-			
 			_scrollStop: function(event) {
-				scr = false;
-				//that._sticky();
+				scrolling = false;
 
 					if ( !offset && $(document).scrollTop() > headerHeight ) {
 						$('.page:not(.current)').each(function() {
@@ -359,16 +340,6 @@ define(['jqui','events','scrollTo','transit'], function() {
 						offset = false;
 					}
 					
-			},
-			
-			
-			_sticky: function() {
-				$el = $('nav');
-				if ( $('fixed-nav').not(":visible") && $(document).scrollTop() >= headerHeight ) {
-					$('fixed-nav').show();
-				} else if ( $('fixed-nav').is(":visible") &&  $(document).scrollTop() < headerHeight ) {
-					$('fixed-nav').hide();
-				}
 			},
 			
 			

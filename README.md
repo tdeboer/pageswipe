@@ -12,10 +12,10 @@ Load pages asynchronous.
 - call the plugin on the container of the pages. i.e. $('.wrapper').swipeable(); 
 
 <h3>Todo</h3>
-- modernizr checks
-- navigate directly to project by hash in url
+- improve modernizr checks and executed code after check
 - prevent touchmove code queueing up by canceling actions or regulating events firing
 - optimize for slower android devices
 - explore posibility for hardware acceleration
-- navigate directly to project by hash in url
 - write documentation
+- remove unneeded events from jquery.custom.events.js
+- update window.location.hash at _scrollStop()

@@ -1,6 +1,5 @@
 @import "compass/css3/box-shadow";
 
-
 body {
 	position: relative;
 	overflow-x: hidden; /* does it work on mobile?? needed? */
@@ -25,14 +24,17 @@ body {
 	position: relative;
 	top: 0;
 	z-index: 0;
-	/* -webkit-transform: translateZ(0); */
 	background-color: #eee;
 	@include single-box-shadow;
-	/* @include debug-vertical-alignment; */
 }
 
 .touch .page {
 	position: fixed;
+	-webkit-transform: translateZ(0); /* hardware acceleration */
+}
+
+.no-touch .page {
+	padding-top: 9.375%;
 }
 
 .page.first {
